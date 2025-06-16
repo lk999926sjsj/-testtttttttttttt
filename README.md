@@ -32,9 +32,11 @@ Khanzitos é um script experimental que ativa uma interface moderna sobre a plat
 
 ## 🧪 Como usar
 
+⚠️ **Este projeto está em versão beta!** Pode conter bugs ou comportamentos inesperados. Use com cautela.
+
 ### Método 1 – Direto na barra de endereços
 
-1. Acesse o site do [Khan Academy](https://pt.khanacademy.org)
+1. Acesse o site do [Khan Academy](https://pt.khanacademy.org)  
 2. Cole o código abaixo na barra de endereços e pressione `Enter`:
 
 ```javascript
