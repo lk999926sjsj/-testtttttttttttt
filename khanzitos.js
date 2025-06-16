@@ -13,20 +13,20 @@
     autoAnswerDelay: 1.5
   };
 
-  function sendToast(message, gravity = "bottom", duration = 3000) {
-    Toastify({
-      text: message,
-      duration: duration,
-      gravity: gravity,
-      position: "center",
-      stopOnFocus: true,
-      style: {
-        background: "#111",
-        border: "1px solid #800080",
-        color: "#fff"
-      }
-    }).showToast();
-  }
+function sendToast(message, duration = 4000) {
+  const toast = document.createElement("div");
+  toast.className = "khz-toast";
+  toast.innerHTML = `
+    <div class="khz-toast-message">${message}</div>
+    <div class="khz-toast-progress"></div>
+  `;
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.classList.add("hide");
+    setTimeout(() => toast.remove(), 500);
+  }, duration);
+}
 
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -46,7 +46,8 @@
     .khz-input-group { display: flex; align-items: center; justify-content: space-between; margin-top: 5px; }
     .khz-input-group label { font-size: 12px; color: #ccc; }
     .khz-input-group input { width: 60px; background: #222; color: #fff; border: 1px solid #800080; border-radius: 4px; padding: 4px; text-align: center; }
-  `;
+    .khz-toast{position:fixed;bottom:20px;right:20px;background:#111;color:#fff;border:1px solid #800080;border-radius:8px;padding:12px 16px;margin-top:10px;box-shadow:0 0 10px #800080;font-size:14px;font-family:sans-serif;z-index:999999;animation:fadeIn 0.3s ease-out;overflow:hidden;width:fit-content;max-width:300px}.khz-toast.hide{animation:fadeOut 0.5s ease forwards}.khz-toast-progress{position:absolute;left:0;bottom:0;height:4px;background:#800080;animation:toastProgress linear forwards;animation-duration:4s;width:100%}.khz-toast-message{position:relative;z-index:1}@keyframes toastProgress{from{width:100%}to{width:0%}}@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}@keyframes fadeOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(10px)}
+`;
   document.head.appendChild(style);
 
   const originalParse = JSON.parse;
