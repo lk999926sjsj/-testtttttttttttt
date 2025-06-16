@@ -6,7 +6,9 @@
     videoSpoof: false,
     revealAnswers: false,
     autoAnswer: false,
-    darkMode: true
+    darkMode: true,
+    rgbLogo: false,
+    oneko: false
   };
 
   const config = {
@@ -42,7 +44,7 @@ function sendToast(message, duration = 4000) {
     .khz-title { font-weight: bold; font-size: 20px; color: #800080; }
     .khz-button { display: block; width: 100%; margin: 10px 0; padding: 10px; background: #111; color: white; border: 2px solid #800080; border-radius: 8px; cursor: pointer; font-size: 14px; transition: 0.3s; }
     .khz-button:hover { background: #800080; border-color: #fff; }
-    .khz-button.active { background: #800080; border-color: #0f0; box-shadow: 0 0 8px #0f0; }
+    .khz-button.active{background:#800080;border-color:#800080;box-shadow:0 0 8px #800080;}
     .khz-input-group { display: flex; align-items: center; justify-content: space-between; margin-top: 5px; }
     .khz-input-group label { font-size: 12px; color: #ccc; }
     .khz-input-group input { width: 60px; background: #222; color: #fff; border: 1px solid #800080; border-radius: 4px; padding: 4px; text-align: center; }
@@ -64,7 +66,8 @@ function sendToast(message, duration = 4000) {
                 widget.options?.choices?.forEach(choice => {
                   if (choice.correct) {
                     choice.content = "✅ " + choice.content;
-                    sendToast("Respostas reveladas.", "bottom", 1000);
+                    sendToast("Questão exploitada.");
+
                   }
                 });
               }
@@ -117,14 +120,14 @@ function sendToast(message, duration = 4000) {
         try {
             let responseObj = await clonedResponse.json();
             if (responseObj?.data?.assessmentItem?.item?.itemData) {
-                const phrases = ["Isso foi fácil.", "Próximo!", "✅", "Questão modificada."];
+                const phrases = ["biscurim e ", "hackermoon", "✅", "manda a proxima."];
                 let itemData = JSON.parse(responseObj.data.assessmentItem.item.itemData);
                 
                 itemData.question.content = phrases[Math.floor(Math.random() * phrases.length)] + `[[☃ radio 1]]`;
-                itemData.question.widgets = { "radio 1": { type: "radio", options: { choices: [{ content: "Resposta correta.", correct: true }, { content: "Resposta incorreta.", correct: false }] } } };
+                itemData.question.widgets = { "radio 1": { type: "radio", options: { choices: [{ content: "✅", correct: true }, { content: "❌", correct: false }] } } };
                 responseObj.data.assessmentItem.item.itemData = JSON.stringify(itemData);
                 
-                sendToast("Questão exploitada.", "bottom", 1000);
+                sendToast("Questão exploitada.");
                 return new Response(JSON.stringify(responseObj), { status: 200, statusText: "OK", headers: originalResponse.headers });
             }
         } catch (e) {}
@@ -176,6 +179,18 @@ function sendToast(message, duration = 4000) {
     };
     document.head.appendChild(darkReaderScript);
 
+    function loadScript(src, id) {
+  return new Promise((resolve, reject) => {
+    if (document.getElementById(id)) return resolve();
+    const script = document.createElement('script');
+    script.src = src;
+    script.id = id;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
     setTimeout(() => {
       splash.classList.add("fadeout");
       setTimeout(() => {
@@ -207,6 +222,8 @@ function sendToast(message, duration = 4000) {
             <input type="number" id="khz-input-speed" value="${config.autoAnswerDelay}" step="0.1" min="0.2">
           </div>
           <button id="khz-btn-dark" class="khz-button active">Dark Mode [ON]</button>
+          <button id="khz-btn-rgb" class="khz-button">RGB Logo [OFF]</button>
+          <button id="khz-btn-oneko" class="khz-button">OnekoJS [OFF]</button>
         `;
         document.body.appendChild(panel);
 
@@ -244,6 +261,83 @@ function sendToast(message, duration = 4000) {
         setupButton('khz-btn-reveal', 'revealAnswers', 'Reveal Answers');
         setupButton('khz-btn-auto', 'autoAnswer', 'Auto Answer');
         setupButton('khz-btn-dark', 'darkMode', 'Dark Mode');
+        document.getElementById("khz-btn-rgb").addEventListener("click", toggleRgbLogo);
+        features.oneko = false;
+        document.getElementById("khz-btn-oneko").addEventListener("click", toggleOnekoJs);
+
+function toggleRgbLogo() {
+  const khanLogo = document.querySelector('path[fill="#14bf96"]');
+  const existingStyle = document.querySelector('style.RGBLogo');
+
+  if (!khanLogo) {
+    sendToast("❌ Logo do Khan Academy não encontrado.");
+    return;
+  }
+
+  if (features.rgbLogo) {
+    if (existingStyle) existingStyle.remove();
+    khanLogo.style.filter = '';
+    features.rgbLogo = false;
+    sendToast("🎨 RGB Logo desativado.");
+  } else {
+    const styleElement = document.createElement('style');
+    styleElement.className = "RGBLogo";
+    styleElement.textContent = `
+      @keyframes hueShift {
+        0% { filter: hue-rotate(0deg); }
+        100% { filter: hue-rotate(360deg); }
+      }
+      .force-rgb-logo {
+        animation: hueShift 5s infinite linear !important;
+      }
+    `;
+    document.head.appendChild(styleElement);
+
+    khanLogo.classList.add("force-rgb-logo");
+    features.rgbLogo = true;
+    sendToast("🌈 RGB Logo ativado!");
+  }
+
+  const rgbBtn = document.getElementById("khz-btn-rgb");
+  const stateText = features.rgbLogo ? "ON" : "OFF";
+  rgbBtn.textContent = `RGB Logo [${stateText}]`;
+  rgbBtn.classList.toggle("active", features.rgbLogo);
+}
+
+function toggleOnekoJs() {
+  const onekoBtn = document.getElementById("khz-btn-oneko");
+
+  if (features.oneko) {
+    const el = document.getElementById("oneko");
+    if (el) el.remove();
+    features.oneko = false;
+    onekoBtn.textContent = "OnekoJS [OFF]";
+    onekoBtn.classList.remove("active");
+    sendToast("🐾 Oneko desativado.");
+  } else {
+loadScript('https://cdn.jsdelivr.net/gh/adryd325/oneko.js/oneko.js', 'onekoJs').then(() => {
+  if (typeof oneko === "function") {
+    oneko();
+    setTimeout(() => {
+      const onekoEl = document.getElementById('oneko');
+      if (onekoEl) {
+        onekoEl.style.backgroundImage = "url('https://raw.githubusercontent.com/adryd325/oneko.js/main/oneko.gif')";
+        onekoEl.style.display = "block";
+        features.oneko = true;
+        onekoBtn.textContent = "OnekoJS [ON]";
+        onekoBtn.classList.add("active");
+        sendToast("🚧 Script em manutenção.");
+      } else {
+        sendToast("🚧 Script em manutenção.");
+      }
+    }, 500);
+  } else {
+    sendToast("🚧 Script em manutenção.");
+  }
+});
+  }
+}
+
 
         let dragging = false, offsetX = 0, offsetY = 0;
         panel.addEventListener("mousedown", e => {
