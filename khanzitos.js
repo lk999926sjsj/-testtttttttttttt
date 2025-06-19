@@ -49,7 +49,7 @@ console.log(Object.defineProperties(new Error, { toString: {value() {(new Error)
 
 /* Misc Styles */
 document.head.appendChild(Object.assign(document.createElement("style"),{innerHTML:"@font-face{font-family:'MuseoSans';src:url('https://corsproxy.io/?url=https://r2.e-z.host/4d0a0bea-60f8-44d6-9e74-3032a64a9f32/ynddewua.ttf')format('truetype')}" }));
-document.head.appendChild(Object.assign(document.createElement('style'),{innerHTML:"::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: #FF0000; } ::-webkit-scrollbar-thumb { background: #CC0000; border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: #990000; }"}));
+document.head.appendChild(Object.assign(document.createElement('style'),{innerHTML:"::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: #FFFFFF; } ::-webkit-scrollbar-thumb { background: #CCCCCC; border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: #999999; }"}));
 document.querySelector("link[rel~='icon']").href = 'https://r2.e-z.host/4d0a0bea-60f8-44d6-9e74-3032a64a9f32/ukh0rq22.png';
 
 /* Emmiter */
@@ -64,9 +64,9 @@ const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 const playAudio = url => { const audio = new Audio(url); audio.play(); debug(`🔊 Tocando áudio de ${url}`); };
 const findAndClickBySelector = selector => { const element = document.querySelector(selector); if (element) { element.click(); sendToast(`⭕ Pressionando ${selector}...`, 1000); } };
 
-function sendToast(text, duration=5000, gravity='bottom') { Toastify({ text: text, duration: duration, gravity: gravity, position: "center", stopOnFocus: true, style: { background: "#FF0000" } }).showToast(); debug(text); };
+function sendToast(text, duration=5000, gravity='bottom') { Toastify({ text: text, duration: duration, gravity: gravity, position: "center", stopOnFocus: true, style: { background: "#FFFFFF" } }).showToast(); debug(text); }; // Cor alterada para branco
 
-async function showSplashScreen() { splashScreen.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background-color:#FF0000;display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;transition:opacity 0.5s ease;user-select:none;color:white;font-family:MuseoSans,sans-serif;font-size:30px;text-align:center;"; splashScreen.innerHTML = '<span style="color:white;">LKXZ</span>'; document.body.appendChild(splashScreen); setTimeout(() => splashScreen.style.opacity = '1', 10);};
+async function showSplashScreen() { splashScreen.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background-color:#FFFFFF;display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;transition:opacity 0.5s ease;user-select:none;color:black;font-family:MuseoSans,sans-serif;font-size:30px;text-align:center;"; splashScreen.innerHTML = '<span style="color:black;">LKXZ</span>'; document.body.appendChild(splashScreen); setTimeout(() => splashScreen.style.opacity = '1', 10);}; // Cores alteradas para branco e texto preto
 async function hideSplashScreen() { splashScreen.style.opacity = '0'; setTimeout(() => splashScreen.remove(), 1000); };
 
 async function loadScript(url, label) { return fetch(url).then(response => response.text()).then(script => { loadedPlugins.push(label); eval(script); }); }
@@ -74,7 +74,6 @@ async function loadCss(url) { return new Promise((resolve) => { const link = doc
 
 /* Visual Functions */
 function setupMenu() {
-    // Labels traduzidos para LKXZ
     loadScript(repoPath+'visuals/mainMenu.js', 'LKXZ - Menu Principal');
     loadScript(repoPath+'visuals/statusPanel.js', 'LKXZ - Painel de Status');
     loadScript(repoPath+'visuals/widgetBot.js', 'LKXZ - Widget Bot');
@@ -83,12 +82,12 @@ function setupMenu() {
 
 /* Main Functions */ 
 function setupMain(){
-    // Labels traduzidos para LKXZ
-    loadScript(repoPath+'functions/questionSpoof.js', 'LKXZ - Simulador de Questões');
-    loadScript(repoPath+'functions/videoSpoof.js', 'LKXZ - Simulador de Vídeos');
+    // Tradução dos nomes dos recursos (que você chamou de "questões")
+    loadScript(repoPath+'functions/questionSpoof.js', 'LKXZ - Simular Questões');
+    loadScript(repoPath+'functions/videoSpoof.js', 'LKXZ - Simular Vídeos');
     loadScript(repoPath+'functions/minuteFarm.js', 'LKXZ - Farm de Minutos');
-    loadScript(repoPath+'functions/spoofUser.js', 'LKXZ - Spoof de Usuário');
-    loadScript(repoPath+'functions/answerRevealer.js', 'LKXZ - Revelador de Respostas');
+    loadScript(repoPath+'functions/spoofUser.js', 'LKXZ - Alterar Usuário');
+    loadScript(repoPath+'functions/answerRevealer.js', 'LKXZ - Revelar Respostas');
     loadScript(repoPath+'functions/rgbLogo.js', 'LKXZ - Logo RGB');
     loadScript(repoPath+'functions/customBanner.js', 'LKXZ - Banner Personalizado');
     loadScript(repoPath+'functions/autoAnswer.js', 'LKXZ - Resposta Automática');
