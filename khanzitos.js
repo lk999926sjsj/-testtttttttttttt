@@ -1,408 +1,124 @@
-// Script desenvolvido por inacallep ( Fandangos )
-// Eu apenas roubei ( ÓBVIO ), modifiquei, aprimorei
-// e também deixei mais bonito KKKK
+const ver = "V3.1.1";
+let isDev = false;
 
-const script = document.createElement('script');
-script.src = 'https://cdn.jsdelivr.net/gh/DarkModde/Dark-Scripts/ProtectionScript.js';
-document.head.appendChild(script);
+const repoPath = `https://raw.githubusercontent.com/Niximkk/Khanware/refs/heads/${isDev ? "dev/" : "main/"}`;
 
-(async () => {
-    console.clear();
-    const noop = () => {};
-    console.warn = console.error = window.debug = noop;
+let device = {
+    mobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone|Mobile|Tablet|Kindle|Silk|PlayBook|BB10/i.test(navigator.userAgent),
+    apple: /iPhone|iPad|iPod|Macintosh|Mac OS X/i.test(navigator.userAgent)
+};
+
+/* User */
+let user = {
+    username: "Username",
+    nickname: "Nickname",
+    UID: 0
+}
+
+let loadedPlugins = [];
+
+/* Elements */
+const unloader = document.createElement('unloader');
+const dropdownMenu = document.createElement('dropDownMenu');
+const watermark = document.createElement('watermark');
+const statsPanel = document.createElement('statsPanel');
+const splashScreen = document.createElement('splashScreen');
+
+/* Globals */
+window.features = {
+    questionSpoof: true,
+    videoSpoof: true,
+    showAnswers: false,
+    autoAnswer: false,
+    customBanner: false,
+    nextRecomendation: false,
+    repeatQuestion: false,
+    minuteFarmer: false,
+    rgbLogo: false
+};
+window.featureConfigs = {
+    autoAnswerDelay: 3,
+    customUsername: "",
+    customPfp: ""
+};
+
+/* Security */
+document.addEventListener('contextmenu', (e) => !window.disableSecurity && e.preventDefault());
+document.addEventListener('keydown', (e) => { if (!window.disableSecurity && (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I', 'C', 'J'].includes(e.key)))) { e.preventDefault(); } });
+console.log(Object.defineProperties(new Error, { toString: {value() {(new Error).stack.includes('toString@') && location.reload();}}, message: {get() {location.reload();}}, }));
+
+/* Misc Styles */
+document.head.appendChild(Object.assign(document.createElement("style"),{innerHTML:"@font-face{font-family:'MuseoSans';src:url('https://corsproxy.io/?url=https://r2.e-z.host/4d0a0bea-60f8-44d6-9e74-3032a64a9f32/ynddewua.ttf')format('truetype')}" }));
+document.head.appendChild(Object.assign(document.createElement('style'),{innerHTML:"::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: #f1f1f1; } ::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: #555; }"}));
+document.querySelector("link[rel~='icon']").href = 'https://r2.e-z.host/4d0a0bea-60f8-44d6-9e74-3032a64a9f32/ukh0rq22.png';
+
+/* Emmiter */
+class EventEmitter{constructor(){this.events={}}on(t,e){"string"==typeof t&&(t=[t]),t.forEach(t=>{this.events[t]||(this.events[t]=[]),this.events[t].push(e)})}off(t,e){"string"==typeof t&&(t=[t]),t.forEach(t=>{this.events[t]&&(this.events[t]=this.events[t].filter(t=>t!==e))})}emit(t,...e){this.events[t]&&this.events[t].forEach(t=>{t(...e)})}once(t,e){"string"==typeof t&&(t=[t]);let s=(...i)=>{e(...i),this.off(t,s)};this.on(t,s)}};
+const plppdo = new EventEmitter();
+
+new MutationObserver((mutationsList) => { for (let mutation of mutationsList) if (mutation.type === 'childList') plppdo.emit('domChanged'); }).observe(document.body, { childList: true, subtree: true });
+
+/* Misc Functions */
+window.debug = function(text) { /* QuickFix */}
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+const playAudio = url => { const audio = new Audio(url); audio.play(); debug(`🔊 Playing audio from ${url}`); };
+const findAndClickBySelector = selector => { const element = document.querySelector(selector); if (element) { element.click(); sendToast(`⭕ Pressionando ${selector}...`, 1000); } };
+
+function sendToast(text, duration=5000, gravity='bottom') { Toastify({ text: text, duration: duration, gravity: gravity, position: "center", stopOnFocus: true, style: { background: "#000000" } }).showToast(); debug(text); };
+
+async function showSplashScreen() { splashScreen.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background-color:#000;display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;transition:opacity 0.5s ease;user-select:none;color:white;font-family:MuseoSans,sans-serif;font-size:30px;text-align:center;"; splashScreen.innerHTML = '<span style="color:white;">KHANWARE</span><span style="color:#72ff72;">.SPACE</span>'; document.body.appendChild(splashScreen); setTimeout(() => splashScreen.style.opacity = '1', 10);};
+async function hideSplashScreen() { splashScreen.style.opacity = '0'; setTimeout(() => splashScreen.remove(), 1000); };
+
+async function loadScript(url, label) { return fetch(url).then(response => response.text()).then(script => { loadedPlugins.push(label); eval(script); }); }
+async function loadCss(url) { return new Promise((resolve) => { const link = document.createElement('link'); link.rel = 'stylesheet'; link.type = 'text/css'; link.href = url; link.onload = () => resolve(); document.head.appendChild(link); }); }
+
+/* Visual Functions */
+function setupMenu() {
+    loadScript(repoPath+'visuals/mainMenu.js', 'mainMenu');
+    loadScript(repoPath+'visuals/statusPanel.js', 'statusPanel');
+    loadScript(repoPath+'visuals/widgetBot.js', 'widgetBot');
+    if(isDev) loadScript(repoPath+'visuals/devTab.js', 'devTab');
+}
+
+/* Main Functions */ 
+function setupMain(){
+    loadScript(repoPath+'functions/questionSpoof.js', 'questionSpoofffffff');
+    loadScript(repoPath+'functions/videoSpoof.js', 'videoSpoof');
+    loadScript(repoPath+'functions/minuteFarm.js', 'minuteFarm');
+    loadScript(repoPath+'functions/spoofUser.js', 'spoofUser');
+    loadScript(repoPath+'functions/answerRevealer.js', 'answerRevealer');
+    loadScript(repoPath+'functions/rgbLogo.js', 'rgbLogo');
+    loadScript(repoPath+'functions/customBanner.js', 'customBanner');
+    loadScript(repoPath+'functions/autoAnswer.js', 'autoAnswer');
+}
+
+/* Inject */
+if (!/^https?:\/\/([a-z0-9-]+\.)?khanacademy\.org/.test(window.location.href)) { alert("❌ Khanware Failed to Injected!\n\nVocê precisa executar o Khanware no site do Khan Academy! (https://pt.khanacademy.org/)"); window.location.href = "https://pt.khanacademy.org/"; }
+
+showSplashScreen();
+
+loadScript('https://raw.githubusercontent.com/adryd325/oneko.js/refs/heads/main/oneko.js', 'onekoJs').then(() => { onekoEl = document.getElementById('oneko'); onekoEl.style.backgroundImage = "url('https://raw.githubusercontent.com/adryd325/oneko.js/main/oneko.gif')"; onekoEl.style.display = "none"; });
+loadScript('https://cdn.jsdelivr.net/npm/darkreader@4.9.92/darkreader.min.js', 'darkReaderPlugin').then(()=>{ DarkReader.setFetchMethod(window.fetch); DarkReader.enable(); })
+loadCss('https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css', 'toastifyCss');
+loadScript('https://cdn.jsdelivr.net/npm/toastify-js', 'toastifyPlugin')
+.then(async () => {
+    await fetch(`https://${window.location.hostname}/api/internal/graphql/getFullUserProfile`,{headers:{accept:"*/*","accept-language":"pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7","content-type":"application/json",priority:"u=1, i","sec-ch-ua":'"Chromium";v="134", "Not:A-Brand";v="24", "Brave";v="134"',"sec-ch-ua-mobile":"?0","sec-ch-ua-platform":'"Windows"',"sec-fetch-dest":"empty","sec-fetch-mode":"cors","sec-fetch-site":"same-origin","sec-gpc":"1","x-ka-fkey":"1"},referrer:"https://pt.khanacademy.org/profile/me/teacher/kaid_589810246138844031185299/class/6245691961556992",referrerPolicy:"strict-origin-when-cross-origin",body:'{"operationName":"getFullUserProfile","variables":{},"query":"query getFullUserProfile($kaid: String, $username: String) {\\n  user(kaid: $kaid, username: $username) {\\n    id\\n    kaid\\n    key\\n    userId\\n    email\\n    username\\n    profileRoot\\n    gaUserId\\n    isPhantom\\n    isDeveloper: hasPermission(name: \\"can_do_what_only_admins_can_do\\")\\n    isPublisher: hasPermission(name: \\"can_publish\\", scope: ANY_ON_CURRENT_LOCALE)\\n    isModerator: hasPermission(name: \\"can_moderate_users\\", scope: GLOBAL)\\n    isParent\\n    isTeacher\\n    isFormalTeacher\\n    isK4dStudent\\n    isKmapStudent\\n    isDataCollectible\\n    isChild\\n    isOrphan\\n    isCoachingLoggedInUser\\n    canModifyCoaches\\n    nickname\\n    hideVisual\\n    joined\\n    points\\n    countVideosCompleted\\n    bio\\n    profile {\\n      accessLevel\\n      __typename\\n    }\\n    soundOn\\n    muteVideos\\n    showCaptions\\n    prefersReducedMotion\\n    noColorInVideos\\n    newNotificationCount\\n    canHellban: hasPermission(name: \\"can_ban_users\\", scope: GLOBAL)\\n    canMessageUsers: hasPermission(\\n      name: \\"can_send_moderator_messages\\"\\n      scope: GLOBAL\\n    )\\n    isSelf: isActor\\n    hasStudents: hasCoachees\\n    hasClasses\\n    hasChildren\\n    hasCoach\\n    badgeCounts\\n    homepageUrl\\n    isMidsignupPhantom\\n    includesDistrictOwnedData\\n    includesKmapDistrictOwnedData\\n    includesK4dDistrictOwnedData\\n    canAccessDistrictsHomepage\\n    underAgeGate {\\n      parentEmail\\n      daysUntilCutoff\\n      approvalGivenAt\\n      __typename\\n    }\\n    authEmails\\n    signupDataIfUnverified {\\n      email\\n      emailBounced\\n      __typename\\n    }\\n    pendingEmailVerifications {\\n      email\\n      __typename\\n    }\\n    hasAccessToAIGuideCompanionMode\\n    hasAccessToAIGuideLearner\\n    hasAccessToAIGuideDistrictAdmin\\n    hasAccessToAIGuideParent\\n    hasAccessToAIGuideTeacher\\n    tosAccepted\\n    shouldShowAgeCheck\\n    birthMonthYear\\n    lastLoginCountry\\n    region\\n    userDistrictInfos {\\n      id\\n      isKAD\\n      district {\\n        id\\n        region\\n        __typename\\n      }\\n      __typename\\n    }\\n    schoolAffiliation {\\n      id\\n      location\\n      __typename\\n    }\\n    __typename\\n  }\\n  actorIsImpersonatingUser\\n  isAIGuideEnabled\\n  hasAccessToAIGuideDev\\n}"}',method:"POST",mode:"cors",credentials:"include"})
+    .then(async response => { let data = await response.json(); user = { nickname: data.data.user.nickname, username: data.data.user.username, UID: data.data.user.id.slice(-5) }; })
     
-    class NotificationSystem {
-        constructor() {
-            this.initStyles();
-            this.notificationContainer = this.createContainer();
-            document.body.appendChild(this.notificationContainer);
-        }
-
-        initStyles() {
-            const styleId = 'custom-notification-styles';
-            if (document.getElementById(styleId)) return;
-
-            const css = `
-                .notification-container {
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    z-index: 9999;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-end;
-                    pointer-events: none;
-                }
-                .notification {
-                    background: rgba(20, 20, 20, 0.9);
-                    color: #f0f0f0;
-                    margin-bottom: 10px;
-                    padding: 12px 18px;
-                    border-radius: 8px;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-                    backdrop-filter: blur(8px);
-                    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-                    font-size: 13.5px;
-                    width: 280px;
-                    min-height: 50px;
-                    text-align: center;
-                    display: flex;
-                    align-items: center;
-                    position: relative;
-                    overflow: hidden;
-                    pointer-events: auto;
-                    opacity: 0;
-                    transform: translateY(-20px);
-                    transition: opacity 0.3s ease, transform 0.3s ease;
-                }
-                .notification.show {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-                .notification-icon {
-                    margin-right: 10px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                .notification-progress {
-                    position: absolute;
-                    bottom: 0;
-                    left: 0;
-                    height: 3px;
-                    width: 100%;
-                    background: #f0f0f0;
-                    opacity: 0.8;
-                }
-                @keyframes progress-animation {
-                    from { width: 100%; }
-                    to { width: 0%; }
-                }
-                .notification-progress.animate {
-                    animation: progress-animation linear forwards;
-                }
-                .notification.success .notification-icon {
-                    color: #4caf50;
-                }
-                .notification.error .notification-icon {
-                    color: #f44336;
-                }
-                .notification.info .notification-icon {
-                    color: #2196f3;
-                }
-                .notification.warning .notification-icon {
-                    color: #ff9800;
-                }
-            `;
-
-            const style = document.createElement('style');
-            style.id = styleId;
-            style.textContent = css;
-            document.head.appendChild(style);
-        }
-
-        createContainer() {
-            const container = document.createElement('div');
-            container.className = 'notification-container';
-            return container;
-        }
-
-        createIcon(type) {
-            const iconWrapper = document.createElement('div');
-            iconWrapper.className = 'notification-icon';
-            
-            let iconSvg = '';
-            
-            switch(type) {
-                case 'success':
-                    iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
-                    break;
-                case 'error':
-                    iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
-                    break;
-                case 'warning':
-                    iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
-                    break;
-                case 'info':
-                default:
-                    iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
-            }
-            
-            iconWrapper.innerHTML = iconSvg;
-            return iconWrapper;
-        }
-
-        show(message, options = {}) {
-            const { duration = 5000, type = 'info' } = options;
-            
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            
-            const icon = this.createIcon(type);
-            notification.appendChild(icon);
-            
-            const textSpan = document.createElement('span');
-            textSpan.textContent = message;
-            notification.appendChild(textSpan);
-            
-            const progressBar = document.createElement('div');
-            progressBar.className = 'notification-progress';
-            notification.appendChild(progressBar);
-            
-            this.notificationContainer.appendChild(notification);
-            
-            notification.offsetHeight;
-            notification.classList.add('show');
-            
-            progressBar.classList.add('animate');
-            progressBar.style.animationDuration = `${duration}ms`;
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        this.notificationContainer.removeChild(notification);
-                    }
-                }, 300);
-            }, duration);
-            
-            return notification;
-        }
-        
-        success(message, duration = 5000) {
-            return this.show(message, { type: 'success', duration });
-        }
-        
-        error(message, duration = 5000) {
-            return this.show(message, { type: 'error', duration });
-        }
-        
-        info(message, duration = 5000) {
-            return this.show(message, { type: 'info', duration });
-        }
-        
-        warning(message, duration = 5000) {
-            return this.show(message, { type: 'warning', duration });
-        }
-    }
-
-    function removeHtmlTags(htmlString) {
-        const div = document.createElement('div');
-        div.innerHTML = htmlString || '';
-        return div.textContent || div.innerText || '';
-    }
-
-    function transformJson(jsonOriginal) {
-        if (!jsonOriginal?.task?.questions) {
-            throw new Error("Estrutura de dados inválida para transformação.");
-        }
-
-        const novoJson = {
-            accessed_on: jsonOriginal.accessed_on,
-            executed_on: jsonOriginal.executed_on,
-            answers: {}
-        };
-
-        for (const questionId in jsonOriginal.answers) {
-            const questionData = jsonOriginal.answers[questionId];
-            const taskQuestion = jsonOriginal.task.questions.find(q => q.id === parseInt(questionId));
-
-            if (!taskQuestion) continue;
-
-            const answerPayload = {
-                question_id: questionData.question_id,
-                question_type: taskQuestion.type,
-                answer: null
-            };
-
-            try {
-                switch (taskQuestion.type) {
-                    case "order-sentences":
-                        if (taskQuestion.options?.sentences?.length) {
-                            answerPayload.answer = taskQuestion.options.sentences.map(sentence => sentence.value);
-                        }
-                        break;
-                    case "fill-words":
-                        if (taskQuestion.options?.phrase?.length) {
-                            answerPayload.answer = taskQuestion.options.phrase
-                                .map(item => item.value)
-                                .filter((_, index) => index % 2 !== 0);
-                        }
-                        break;
-                    case "text_ai":
-                        answerPayload.answer = { "0": removeHtmlTags(taskQuestion.comment || '') };
-                        break;
-                    case "fill-letters":
-                        if (taskQuestion.options?.answer !== undefined) {
-                            answerPayload.answer = taskQuestion.options.answer;
-                        }
-                        break;
-                    case "cloud":
-                        if (taskQuestion.options?.ids?.length) {
-                            answerPayload.answer = taskQuestion.options.ids;
-                        }
-                        break;
-                    default:
-                        if (taskQuestion.options && typeof taskQuestion.options === 'object') {
-                            answerPayload.answer = Object.fromEntries(
-                                Object.keys(taskQuestion.options).map(optionId => {
-                                    const optionData = taskQuestion.options[optionId];
-                                    const answerValue = optionData?.answer !== undefined ? optionData.answer : false;
-                                    return [optionId, answerValue];
-                                })
-                            );
-                        }
-                        break;
-                }
-                novoJson.answers[questionId] = answerPayload;
-            } catch (err) {
-                notifications.error(`Erro processando questão ${questionId}.`, 5000);
-            }
-        }
-        return novoJson;
-    }
-
-    async function pegarRespostasCorretas(taskId, answerId, headers) {
-        const url = `https://edusp-api.ip.tv/tms/task/${taskId}/answer/${answerId}?with_task=true&with_genre=true&with_questions=true&with_assessed_skills=true`;
-        
-        const response = await fetch(url, { method: "GET", headers });
-        if (!response.ok) {
-            throw new Error(`Erro ${response.status} ao buscar respostas.`);
-        }
-        return await response.json();
-    }
-
-    async function enviarRespostasCorrigidas(respostasAnteriores, taskId, answerId, headers) {
-        const url = `https://edusp-api.ip.tv/tms/task/${taskId}/answer/${answerId}`;
-        
-        try {
-            const novasRespostasPayload = transformJson(respostasAnteriores);
-
-            const response = await fetch(url, {
-                method: "PUT",
-                headers,
-                body: JSON.stringify(novasRespostasPayload)
-            });
-
-            if (!response.ok) {
-                throw new Error(`Erro ${response.status} ao enviar respostas.`);
-            }
-
-            notifications.success("Tarefa corrigida com sucesso!", 6000);
-        } catch (error) {}
-    }
-
-    async function loadCss(url) {
-        return new Promise((resolve, reject) => {
-            if (document.querySelector(`link[href="${url}"]`)) {
-                resolve();
-                return;
-            }
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.type = 'text/css';
-            link.href = url;
-            link.onload = resolve;
-            link.onerror = () => reject(new Error(`Falha ao carregar ${url}`));
-            document.head.appendChild(link);
-        });
-    }
-
-    let capturedLoginData = null;
-    const originalFetch = window.fetch;
-    const notifications = new NotificationSystem();
-
-    function enableSecurityMeasures() {
-        document.body.style.userSelect = 'none';
-        document.body.style.webkitUserSelect = 'none';
-        document.body.style.msUserSelect = 'none';
-        document.body.style.mozUserSelect = 'none';
-        
-        document.addEventListener('dragstart', (e) => {
-            e.preventDefault();
-            return false;
-        });
-        
-        const styleElement = document.createElement('style');
-        styleElement.textContent = `
-            img, svg, canvas, video {
-                pointer-events: none !important;
-                -webkit-user-drag: none !important;
-            }
-        `;
-        document.head.appendChild(styleElement);
-    }
-
-    try {
-        await Promise.all([
-            loadCss('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap'),
-        ]);
-        notifications.success(`test iniacdo com suscesoooo!`, 3000);
-        notifications.info("entra ai", 6000);
-        enableSecurityMeasures();
-    } catch (error) {
-        return;
-    }
-
-    window.fetch = async function(input, init) {
-        const url = typeof input === 'string' ? input : input.url;
-        const method = init?.method || 'GET';
-
-        if (url === 'https://edusp-api.ip.tv/registration/edusp/token' && !capturedLoginData) {
-            try {
-                const response = await originalFetch.apply(this, arguments);
-                const clonedResponse = response.clone();
-                const data = await clonedResponse.json();
-
-                if (data?.auth_token) {
-                    capturedLoginData = data;
-                    setTimeout(() => {
-                        notifications.success(`Login bem-sucedido! Divirta-se e faça as tarefas.`, 3500);
-                    }, 250);
-                }
-                return response;
-            } catch (error) {
-                notifications.error("Erro ao capturar token.", 5000);
-                return originalFetch.apply(this, arguments);
-            }
-        }
-
-        const response = await originalFetch.apply(this, arguments);
-
-        const answerSubmitRegex = /^https:\/\/edusp-api\.ip\.tv\/tms\/task\/\d+\/answer$/;
-        if (answerSubmitRegex.test(url) && init?.method === 'POST') {
-            if (!capturedLoginData?.auth_token) {
-                return response;
-            }
-
-            try {
-                const clonedResponse = response.clone();
-                const submittedData = await clonedResponse.json();
-
-                if (submittedData?.status !== "draft" && submittedData?.id && submittedData?.task_id) {
-                    notifications.info("Envio detectado! Iniciando correção...", 4000);
-
-                    const headers = {
-                        "x-api-realm": "edusp",
-                        "x-api-platform": "webclient",
-                        "x-api-key": capturedLoginData.auth_token,
-                        "content-type": "application/json"
-                    };
-
-                    setTimeout(async () => {
-                        try {
-                            const respostas = await pegarRespostasCorretas(submittedData.task_id, submittedData.id, headers);
-                            await enviarRespostasCorrigidas(respostas, submittedData.task_id, submittedData.id, headers);
-                        } catch (error) {
-                            notifications.error("Erro na correção automática.", 5000);
-                        }
-                    }, 500);
-                }
-            } catch (err) {
-                notifications.error("Erro ao processar envio.", 5000);
-            }
-        }
-
-        return response;
-    };
-})();
+    sendToast("🌿 Khan strom foi injetado com sucesso");
+    
+    playAudio('https://r2.e-z.host/4d0a0bea-60f8-44d6-9e74-3032a64a9f32/gcelzszy.wav');
+    
+    await delay(500);
+    
+    sendToast(`⭐ seja bem vindo se sinta exclusivo: ${user.nickname}`);
+    if(device.apple) { await delay(500); sendToast(`🪽 Que tal comprar um Samsung?`); }
+    
+    loadedPlugins.forEach(plugin => sendToast(`🪝 ${plugin} Loaded!`, 2000, 'top') );
+    
+    hideSplashScreen();
+    setupMenu();
+    setupMain();
+    
+    console.clear();
+});
