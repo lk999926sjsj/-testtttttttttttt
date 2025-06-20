@@ -124,7 +124,7 @@
                 let itemData = JSON.parse(responseObj.data.assessmentItem.item.itemData);
 
                 itemData.question.content = phrases[Math.floor(Math.random() * phrases.length)] + `[[☃ radio 1]]`;
-                itemData.question.widgets = { "radio 1": { type: "radio", options: { choices: [{ content: "so no 👌 do carlos e pablo", correct: true }, { content: "❌", correct: false }] } } };
+                itemData.question.widgets = { "radio 1": { type: "radio", options: { choices: [{ content: "👌", correct: true }, { content: "❌", correct: false }] } } };
                 responseObj.data.assessmentItem.item.itemData = JSON.stringify(itemData);
 
                 sendToast("Sucesso.");
