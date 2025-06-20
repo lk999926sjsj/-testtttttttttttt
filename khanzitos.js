@@ -1,125 +1,365 @@
-const ver = "V3.1.1";
-let isDev = false;
+(function() {
+  if (document.getElementById("lkxz.7-panel")) return;
 
-const repoPath = `https://raw.githubusercontent.com/Niximkk/Khanware/refs/heads/${isDev ? "dev/" : "main/"}`;
-
-let device = {
-    mobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone|Mobile|Tablet|Kindle|Silk|PlayBook|BB10/i.test(navigator.userAgent),
-    apple: /iPhone|iPad|iPod|Macintosh|Mac OS X/i.test(navigator.userAgent)
-};
-
-/* User */
-let user = {
-    username: "Username",
-    nickname: "Nickname",
-    UID: 0
-}
-
-let loadedPlugins = [];
-
-/* Elements */
-const unloader = document.createElement('unloader');
-const dropdownMenu = document.createElement('dropDownMenu');
-const watermark = document.createElement('watermark');
-const statsPanel = document.createElement('statsPanel');
-const splashScreen = document.createElement('splashScreen');
-
-/* Globals */
-window.features = {
-    questionSpoof: true,
-    videoSpoof: true,
-    showAnswers: false,
+  const features = {
+    questionSpoof: false,
+    videoSpoof: false,
+    revealAnswers: false,
     autoAnswer: false,
-    customBanner: false,
-    nextRecomendation: false,
-    repeatQuestion: false,
-    minuteFarmer: false,
-    rgbLogo: false
-};
-window.featureConfigs = {
-    autoAnswerDelay: 3,
-    customUsername: "",
-    customPfp: ""
-};
+    darkMode: true,
+    rgbLogo: false,
+    oneko: false
+  };
 
-/* Security */
-document.addEventListener('contextmenu', (e) => !window.disableSecurity && e.preventDefault());
-document.addEventListener('keydown', (e) => { if (!window.disableSecurity && (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I', 'C', 'J'].includes(e.key)))) { e.preventDefault(); } });
-console.log(Object.defineProperties(new Error, { toString: {value() {(new Error).stack.includes('toString@') && location.reload();}}, message: {get() {location.reload();}}, }));
+  const config = {
+    autoAnswerDelay: 1.5
+  };
 
-/* Misc Styles */
-document.head.appendChild(Object.assign(document.createElement("style"),{innerHTML:"@font-face{font-family:'MuseoSans';src:url('https://corsproxy.io/?url=https://r2.e-z.host/4d0a0bea-60f8-44d6-9e74-3032a64a9f32/ynddewua.ttf')format('truetype')}" }));
-document.head.appendChild(Object.assign(document.createElement('style'),{innerHTML:"::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: #FFFFFF; } ::-webkit-scrollbar-thumb { background: #CCCCCC; border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: #999999; }"}));
-document.querySelector("link[rel~='icon']").href = 'https://r2.e-z.host/4d0a0bea-60f8-44d6-9e74-3032a64a9f32/ukh0rq22.png';
+function sendToast(message, duration = 4000) {
+  const toast = document.createElement("div");
+  toast.className = "lkxz.7-toast";
+  toast.innerHTML = `
+    <div class="lkxz.7-toast-message">${message}</div>
+    <div class="lkxz.7-toast-progress"></div>
+  `;
+  document.body.appendChild(toast);
 
-/* Emmiter */
-class EventEmitter{constructor(){this.events={}}on(t,e){"string"==typeof t&&(t=[t]),t.forEach(t=>{this.events[t]||(this.events[t]=[]),this.events[t].push(e)})}off(t,e){"string"==typeof t&&(t=[t]),t.forEach(t=>{this.events[t]&&(this.events[t]=this.events[t].filter(t=>t!==e))})}emit(t,...e){this.events[t]&&this.events[t].forEach(t=>{t(...e)})}once(t,e){"string"==typeof t&&(t=[t]);let s=(...i)=>{e(...i),this.off(t,s)};this.on(t,s)}};
-const plppdo = new EventEmitter();
-
-new MutationObserver((mutationsList) => { for (let mutation of mutationsList) if (mutation.type === 'childList') plppdo.emit('domChanged'); }).observe(document.body, { childList: true, subtree: true });
-
-/* Misc Functions */
-window.debug = function(text) { /* QuickFix */}
-const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-const playAudio = url => { const audio = new Audio(url); audio.play(); debug(`🔊 Tocando áudio de ${url}`); };
-const findAndClickBySelector = selector => { const element = document.querySelector(selector); if (element) { element.click(); sendToast(`⭕ Pressionando ${selector}...`, 1000); } };
-
-function sendToast(text, duration=5000, gravity='bottom') { Toastify({ text: text, duration: duration, gravity: gravity, position: "center", stopOnFocus: true, style: { background: "#FFFFFF" } }).showToast(); debug(text); }; // Cor alterada para branco
-
-async function showSplashScreen() { splashScreen.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background-color:#FFFFFF;display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;transition:opacity 0.5s ease;user-select:none;color:black;font-family:MuseoSans,sans-serif;font-size:30px;text-align:center;"; splashScreen.innerHTML = '<span style="color:black;">LKXZ</span>'; document.body.appendChild(splashScreen); setTimeout(() => splashScreen.style.opacity = '1', 10);}; // Cores alteradas para branco e texto preto
-async function hideSplashScreen() { splashScreen.style.opacity = '0'; setTimeout(() => splashScreen.remove(), 1000); };
-
-async function loadScript(url, label) { return fetch(url).then(response => response.text()).then(script => { loadedPlugins.push(label); eval(script); }); }
-async function loadCss(url) { return new Promise((resolve) => { const link = document.createElement('link'); link.rel = 'stylesheet'; link.type = 'text/css'; link.href = url; link.onload = () => resolve(); document.head.appendChild(link); }); }
-
-/* Visual Functions */
-function setupMenu() {
-    loadScript(repoPath+'visuals/mainMenu.js', 'LKXZ - Menu Principal');
-    loadScript(repoPath+'visuals/statusPanel.js', 'LKXZ - Painel de Status');
-    loadScript(repoPath+'visuals/widgetBot.js', 'LKXZ - Widget Bot');
-    if(isDev) loadScript(repoPath+'visuals/devTab.js', 'LKXZ - Aba Dev');
+  setTimeout(() => {
+    toast.classList.add("hide");
+    setTimeout(() => toast.remove(), 500);
+  }, duration);
 }
 
-/* Main Functions */ 
-function setupMain(){
-    // Tradução dos nomes dos recursos (que você chamou de "questões")
-    loadScript(repoPath+'functions/questionSpoof.js', 'LKXZ - Simular Questões');
-    loadScript(repoPath+'functions/videoSpoof.js', 'LKXZ - Simular Vídeos');
-    loadScript(repoPath+'functions/minuteFarm.js', 'LKXZ - Farm de Minutos');
-    loadScript(repoPath+'functions/spoofUser.js', 'LKXZ - Alterar Usuário');
-    loadScript(repoPath+'functions/answerRevealer.js', 'LKXZ - Revelar Respostas');
-    loadScript(repoPath+'functions/rgbLogo.js', 'LKXZ - Logo RGB');
-    loadScript(repoPath+'functions/customBanner.js', 'LKXZ - Banner Personalizado');
-    loadScript(repoPath+'functions/autoAnswer.js', 'LKXZ - Resposta Automática');
+  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+  const style = document.createElement("style");
+  style.textContent = `
+    @keyframes fadeOut { 0% { opacity: 1 } 100% { opacity: 0 } }
+    .lkxz.7-splash { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; display: flex; justify-content: center; align-items: center; z-index: 999999; color: #FFFFFF; font-size: 42px; font-family: sans-serif; font-weight: bold; transition: opacity 1s ease; }
+    .lkxz.7-splash.fadeout { animation: fadeOut 1s ease forwards; }
+    .lkxz.7-toggle { position: fixed; bottom: 20px; left: 20px; width: 40px; height: 40px; background: #111; border: 2px solid #FFFFFF; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100000; color: #fff; font-size: 20px; font-weight: bold; box-shadow: 0 0 10px #FFFFFF; font-family: sans-serif; transition: 0.3s; }
+    .lkxz.7-toggle:hover { background: #FFFFFF; }
+    .lkxz.7-panel { position: fixed; top: 100px; left: 100px; width: 300px; background: rgba(0, 0, 0, 0.95); border-radius: 16px; padding: 20px; z-index: 99999; color: #fff; font-family: sans-serif; box-shadow: 0 0 20px rgba(255, 255, 255, 0.6); cursor: grab; display: none; }
+    .lkxz.7-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .lkxz.7-title { font-weight: bold; font-size: 20px; color: #FFFFFF; }
+    .lkxz.7-button { display: block; width: 100%; margin: 10px 0; padding: 10px; background: #111; color: white; border: 2px solid #FFFFFF; border-radius: 8px; cursor: pointer; font-size: 14px; transition: 0.3s; }
+    .lkxz.7-button:hover { background: #FFFFFF; border-color: #fff; }
+    .lkxz.7-button.active{background:#FFFFFF;border-color:#FFFFFF;box-shadow:0 0 8px #FFFFFF;}
+    .lkxz.7-input-group { display: flex; align-items: center; justify-content: space-between; margin-top: 5px; }
+    .lkxz.7-input-group label { font-size: 12px; color: #ccc; }
+    .lkxz.7-input-group input { width: 60px; background: #222; color: #fff; border: 1px solid #FFFFFF; border-radius: 4px; padding: 4px; text-align: center; }
+    .lkxz.7-toast{position:fixed;bottom:20px;right:20px;background:#111;color:#fff;border:1px solid #FFFFFF;border-radius:8px;padding:12px 16px;margin-top:10px;box-shadow:0 0 10px #FFFFFF;font-size:14px;font-family:sans-serif;z-index:999999;animation:fadeIn 0.3s ease-out;overflow:hidden;width:fit-content;max-width:300px}.lkxz.7-toast.hide{animation:fadeOut 0.5s ease forwards}.lkxz.7-toast-progress{position:absolute;left:0;bottom:0;height:4px;background:#FFFFFF;animation:toastProgress linear forwards;animation-duration:4s;width:100%}.lkxz.7-toast-message{position:relative;z-index:1}@keyframes toastProgress{from{width:100%}to{width:0%}}@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}@keyframes fadeOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(10px)}
+`;
+  document.head.appendChild(style);
+
+  const originalParse = JSON.parse;
+  JSON.parse = function(text, reviver) {
+    let data = originalParse(text, reviver);
+    if (features.revealAnswers && data?.data) {
+      try {
+        const dataValues = Object.values(data.data);
+        for (const val of dataValues) {
+          if (val?.item?.itemData) {
+            let itemData = JSON.parse(val.item.itemData);
+            if (itemData.question?.widgets) {
+              for (const widget of Object.values(itemData.question.widgets)) {
+                widget.options?.choices?.forEach(choice => {
+                  if (choice.correct) {
+                    choice.content = "✅ " + choice.content;
+                    sendToast("Questão exploitada.");
+
+                  }
+                });
+              }
+            }
+            val.item.itemData = JSON.stringify(itemData);
+          }
+        }
+      } catch (e) {}
+    }
+    return data;
+  };
+
+  const originalFetch = window.fetch;
+  window.fetch = async function(...args) {
+    let [input, init] = args;
+
+    if (features.videoSpoof) {
+      let requestBody, modifiedBody;
+      if (input instanceof Request) {
+        requestBody = await input.clone().text().catch(() => null);
+      } else if (init?.body) {
+        requestBody = init.body;
+      }
+      
+      if (requestBody && requestBody.includes('"operationName":"updateUserVideoProgress"')) {
+        try {
+          let bodyObj = JSON.parse(requestBody);
+          if (bodyObj.variables?.input) {
+            const duration = bodyObj.variables.input.durationSeconds;
+            bodyObj.variables.input.secondsWatched = duration;
+            bodyObj.variables.input.lastSecondWatched = duration;
+            modifiedBody = JSON.stringify(bodyObj);
+          }
+          if (modifiedBody) {
+            if (input instanceof Request) {
+                args[0] = new Request(input, { body: modifiedBody, ...init });
+            } else {
+                if (!args[1]) args[1] = {};
+                args[1].body = modifiedBody;
+            }
+          }
+        } catch (e) {}
+      }
+    }
+    
+    const originalResponse = await originalFetch.apply(this, args);
+
+    if (features.questionSpoof && originalResponse.ok) {
+        const clonedResponse = originalResponse.clone();
+        try {
+            let responseObj = await clonedResponse.json();
+            if (responseObj?.data?.assessmentItem?.item?.itemData) {
+                const phrases = ["lkxz.7 e ", "lkxz.7", "✅", "manda a proxima."];
+                let itemData = JSON.parse(responseObj.data.assessmentItem.item.itemData);
+                
+                itemData.question.content = phrases[Math.floor(Math.random() * phrases.length)] + `[[☃ radio 1]]`;
+                itemData.question.widgets = { "radio 1": { type: "radio", options: { choices: [{ content: "✅", correct: true }, { content: "❌", correct: false }] } } };
+                responseObj.data.assessmentItem.item.itemData = JSON.stringify(itemData);
+                
+                sendToast("Questão exploitada.");
+                return new Response(JSON.stringify(responseObj), { status: 200, statusText: "OK", headers: originalResponse.headers });
+            }
+        } catch (e) {}
+    }
+
+    return originalResponse;
+  };
+
+  (async function autoAnswerLoop() {
+    while (true) {
+        if (features.autoAnswer) {
+            const click = (selector) => document.querySelector(selector)?.click();
+            click('[data-testid="choice-icon__library-choice-icon"]');
+            await delay(100);
+            click('[data-testid="exercise-check-answer"]');
+            await delay(100);
+            click('[data-testid="exercise-next-question"]');
+            await delay(100);
+            click('._1udzurba');
+            click('._awve9b');
+            
+            const summaryButton = document.querySelector('._1udzurba[data-test-id="end-of-unit-test-next-button"]');
+            if (summaryButton?.innerText.toLowerCase().includes("resumo")) {
+                sendToast("🎉 Exercício concluído!");
+            }
+        }
+        await delay(config.autoAnswerDelay * 1000);
+    }
+  })();
+
+  const splash = document.createElement("div");
+  splash.className = "lkxz.7-splash";
+  splash.textContent = "aprimored by lkxz.7";
+  document.body.appendChild(splash);
+
+  (async function initializeUI() {
+    const toastifyScript = document.createElement('script');
+    toastifyScript.src = 'https://cdn.jsdelivr.net/npm/toastify-js';
+    document.head.appendChild(toastifyScript);
+
+    const darkReaderScript = document.createElement('script');
+    darkReaderScript.src = 'https://cdn.jsdelivr.net/npm/darkreader@4.9.92/darkreader.min.js';
+    darkReaderScript.onload = () => {
+        DarkReader.setFetchMethod(window.fetch);
+        if (features.darkMode) {
+            DarkReader.enable();
+        }
+        sendToast("lkxz.7 Ativado!");
+    };
+    document.head.appendChild(darkReaderScript);
+
+    function loadScript(src, id) {
+  return new Promise((resolve, reject) => {
+    if (document.getElementById(id)) return resolve();
+    const script = document.createElement('script');
+    script.src = src;
+    script.id = id;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
 }
 
-/* Inject */
-if (!/^https?:\/\/([a-z0-9-]+\.)?khanacademy\.org/.test(window.location.href)) { alert("❌ LKXZ falhou ao injetar!\n\nVocê precisa executar o LKXZ no site do Khan Academy! (https://pt.khanacademy.org/)"); window.location.href = "https://pt.khanacademy.org/"; }
+    setTimeout(() => {
+      splash.classList.add("fadeout");
+      setTimeout(() => {
+        splash.remove();
 
-showSplashScreen();
+        const toggleBtn = document.createElement("div");
+        toggleBtn.innerHTML = "≡";
+        toggleBtn.className = "lkxz.7-toggle";
+        toggleBtn.onclick = () => {
+          const p = document.getElementById("lkxz.7-panel");
+          p.style.display = p.style.display === "none" ? "block" : "none";
+        };
+        document.body.appendChild(toggleBtn);
+        
+        const panel = document.createElement("div");
+        panel.id = "lkxz.7-panel";
+        panel.className = "lkxz.7-panel";
+        panel.innerHTML = `
+          <div class="lkxz.7-header">
+            <div class="lkxz.7-title">lkxz.7</div>
+            <div>V1.0</div>
+          </div>
+          <button id="lkxz.7-btn-question" class="lkxz.7-button">Question Spoof [OFF]</button>
+          <button id="lkxz.7-btn-video" class="lkxz.7-button">Video Spoof [OFF]</button>
+          <button id="lkxz.7-btn-reveal" class="lkxz.7-button">Reveal Answers [OFF]</button>
+          <button id="lkxz.7-btn-auto" class="lkxz.7-button">Auto Answer [OFF]</button>
+          <div class="lkxz.7-input-group">
+            <label for="lkxz.7-input-speed">Velocidade (s):</label>
+            <input type="number" id="lkxz.7-input-speed" value="${config.autoAnswerDelay}" step="0.1" min="0.2">
+          </div>
+          <button id="lkxz.7-btn-dark" class="lkxz.7-button active">Dark Mode [ON]</button>
+          <button id="lkxz.7-btn-rgb" class="lkxz.7-button">RGB Logo [OFF]</button>
+          <button id="lkxz.7-btn-oneko" class="lkxz.7-button">OnekoJS [OFF]</button>
+        `;
+        document.body.appendChild(panel);
 
-loadScript('https://raw.githubusercontent.com/adryd325/oneko.js/refs/heads/main/oneko.js', 'onekoJs').then(() => { onekoEl = document.getElementById('oneko'); onekoEl.style.backgroundImage = "url('https://raw.githubusercontent.com/adryd325/oneko.js/main/oneko.gif')"; onekoEl.style.display = "none"; });
-loadScript('https://cdn.jsdelivr.net/npm/darkreader@4.9.92/darkreader.min.js', 'darkReaderPlugin').then(()=>{ DarkReader.setFetchMethod(window.fetch); DarkReader.enable(); })
-loadCss('https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css', 'toastifyCss');
-loadScript('https://cdn.jsdelivr.net/npm/toastify-js', 'toastifyPlugin')
-.then(async () => {
-    await fetch(`https://${window.location.hostname}/api/internal/graphql/getFullUserProfile`,{headers:{accept:"*/*","accept-language":"pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7","content-type":"application/json",priority:"u=1, i","sec-ch-ua":'"Chromium";v="134", "Not:A-Brand";v="24", "Brave";v="134"',"sec-ch-ua-mobile":"?0","sec-ch-ua-platform":'"Windows"',"sec-fetch-dest":"empty","sec-fetch-mode":"cors","sec-fetch-site":"same-origin","sec-gpc":"1","x-ka-fkey":"1"},referrer:"https://pt.khanacademy.org/profile/me/teacher/kaid_589810246138844031185299/class/6245691961556992",referrerPolicy:"strict-origin-when-cross-origin",body:'{"operationName":"getFullUserProfile","variables":{},"query":"query getFullUserProfile($kaid: String, $username: String) {\\n  user(kaid: $kaid, username: $username) {\\n    id\\n    kaid\\n    key\\n    userId\\n    email\\n    username\\n    profileRoot\\n    gaUserId\\n    isPhantom\\n    isDeveloper: hasPermission(name: \\"can_do_what_only_admins_can_do\\")\\n    isPublisher: hasPermission(name: \\"can_publish\\", scope: ANY_ON_CURRENT_LOCALE)\\n    isModerator: hasPermission(name: \\"can_moderate_users\\", scope: GLOBAL)\\n    isParent\\n    isTeacher\\n    isFormalTeacher\\n    isK4dStudent\\n    isKmapStudent\\n    isDataCollectible\\n    isChild\\n    isOrphan\\n    isCoachingLoggedInUser\\n    canModifyCoaches\\n    nickname\\n    hideVisual\\n    joined\\n    points\\n    countVideosCompleted\\n    bio\\n    profile {\\n      accessLevel\\n      __typename\\n    }\\n    soundOn\\n    muteVideos\\n    showCaptions\\n    prefersReducedMotion\\n    noColorInVideos\\n    newNotificationCount\\n    canHellban: hasPermission(name: \\"can_ban_users\\", scope: GLOBAL)\\n    canMessageUsers: hasPermission(\\n      name: \\"can_send_moderator_messages\\"\\n      scope: GLOBAL\\n    )\\n    isSelf: isActor\\n    hasStudents: hasCoachees\\n    hasClasses\\n    hasChildren\\n    hasCoach\\n    badgeCounts\\n    homepageUrl\\n    isMidsignupPhantom\\n    includesDistrictOwnedData\\n    includesKmapDistrictOwnedData\\n    includesK4dDistrictOwnedData\\n    canAccessDistrictsHomepage\\n    underAgeGate {\\n      parentEmail\\n      daysUntilCutoff\\n      approvalGivenAt\\n      __typename\\n    }\\n    authEmails\\n    signupDataIfUnverified {\\n      email\\n      emailBounced\\n      __typename\\n    }\\n    pendingEmailVerifications {\\n      email\\n      __typename\\n    }\\n    hasAccessToAIGuideCompanionMode\\n    hasAccessToAIGuideLearner\\n    hasAccessToAIGuideDistrictAdmin\\n    hasAccessToAIGuideParent\\n    hasAccessToAIGuideTeacher\\n    tosAccepted\\n    shouldShowAgeCheck\\n    birthMonthYear\\n    lastLoginCountry\\n    region\\n    userDistrictInfos {\\n      id\\n      isKAD\\n      district {\\n        id\\n        region\\n        __typename\\n      }\\n      __typename\\n    }\\n    schoolAffiliation {\\n      id\\n      location\\n      __typename\\n    }\\n    __typename\\n  }\\n  actorIsImpersonatingUser\\n  isAIGuideEnabled\\n  hasAccessToAIGuideDev\\n}"}',method:"POST",mode:"cors",credentials:"include"})
-    .then(async response => { let data = await response.json(); user = { nickname: data.data.user.nickname, username: data.data.user.username, UID: data.data.user.id.slice(-5) }; })
-    
-    sendToast("🌿 LKXZ injetado com sucesso"); 
-    
-    playAudio('https://r2.e-z.host/4d0a0bea-60f8-44d6-9e74-3032a64a9f32/gcelzszy.wav');
-    
-    await delay(500);
-    
-    sendToast(`⭐ Seja bem-vindo(a), sinta-se exclusivo(a): ${user.nickname}`);
-    if(device.apple) { await delay(500); sendToast(`🪽 Que tal comprar um Samsung?`); }
-    
-    loadedPlugins.forEach(plugin => sendToast(`🪝 ${plugin} Carregado!`, 2000, 'top') );
-    
-    hideSplashScreen();
-    setupMenu();
-    setupMain();
-    
-    console.clear();
+        const speedInput = document.getElementById('lkxz.7-input-speed');
+        speedInput.addEventListener('input', () => {
+            const newDelay = parseFloat(speedInput.value);
+            if (newDelay >= 0.2) {
+                config.autoAnswerDelay = newDelay;
+            }
+        });
+
+        const setupButton = (buttonId, featureName, buttonText) => {
+            const button = document.getElementById(buttonId);
+            button.addEventListener('click', () => {
+                if (featureName === 'darkMode') {
+                    if (features.darkMode) {
+                        DarkReader.disable();
+                        features.darkMode = false;
+                    } else {
+                        DarkReader.enable();
+                        features.darkMode = true;
+                    }
+                } else {
+                    features[featureName] = !features[featureName];
+                }
+                
+                const stateText = features[featureName] ? 'ON' : 'OFF';
+                button.textContent = `${buttonText} [${stateText}]`;
+                button.classList.toggle('active', features[featureName]);
+            });
+        };
+        
+        setupButton('lkxz.7-btn-question', 'questionSpoof', 'Question Spoof');
+        setupButton('lkxz.7-btn-video', 'videoSpoof', 'Video Spoof');
+        setupButton('lkxz.7-btn-reveal', 'revealAnswers', 'Reveal Answers');
+        setupButton('lkxz.7-btn-auto', 'autoAnswer', 'Auto Answer');
+        setupButton('lkxz.7-btn-dark', 'darkMode', 'Dark Mode');
+        document.getElementById("lkxz.7-btn-rgb").addEventListener("click", toggleRgbLogo);
+        features.oneko = false;
+        document.getElementById("lkxz.7-btn-oneko").addEventListener("click", toggleOnekoJs);
+
+function toggleRgbLogo() {
+  const khanLogo = document.querySelector('path[fill="#14bf96"]');
+  const existingStyle = document.querySelector('style.RGBLogo');
+
+  if (!khanLogo) {
+    sendToast("❌ Logo do Khan Academy não encontrado.");
+    return;
+  }
+
+  if (features.rgbLogo) {
+    if (existingStyle) existingStyle.remove();
+    khanLogo.style.filter = '';
+    features.rgbLogo = false;
+    sendToast("🎨 RGB Logo desativado.");
+  } else {
+    const styleElement = document.createElement('style');
+    styleElement.className = "RGBLogo";
+    styleElement.textContent = `
+      @keyframes hueShift {
+        0% { filter: hue-rotate(0deg); }
+        100% { filter: hue-rotate(360deg); }
+      }
+      .force-rgb-logo {
+        animation: hueShift 5s infinite linear !important;
+      }
+    `;
+    document.head.appendChild(styleElement);
+
+    khanLogo.classList.add("force-rgb-logo");
+    features.rgbLogo = true;
+    sendToast("🌈 RGB Logo ativado!");
+  }
+
+  const rgbBtn = document.getElementById("lkxz.7-btn-rgb");
+  const stateText = features.rgbLogo ? "ON" : "OFF";
+  rgbBtn.textContent = `RGB Logo [${stateText}]`;
+  rgbBtn.classList.toggle("active", features.rgbLogo);
+}
+
+function toggleOnekoJs() {
+  const onekoBtn = document.getElementById("lkxz.7-btn-oneko");
+
+  if (features.oneko) {
+    const el = document.getElementById("oneko");
+    if (el) el.remove();
+    features.oneko = false;
+    onekoBtn.textContent = "OnekoJS [OFF]";
+    onekoBtn.classList.remove("active");
+    sendToast("🐾 Oneko desativado.");
+  } else {
+loadScript('https://cdn.jsdelivr.net/gh/adryd325/oneko.js/oneko.js', 'onekoJs').then(() => {
+  if (typeof oneko === "function") {
+    oneko(); // <- inicia o gato!
+    setTimeout(() => {
+      const onekoEl = document.getElementById('oneko');
+      if (onekoEl) {
+        onekoEl.style.backgroundImage = "url('https://raw.githubusercontent.com/adryd325/oneko.js/main/oneko.gif')";
+        onekoEl.style.display = "block";
+        features.oneko = true;
+        onekoBtn.textContent = "OnekoJS [ON]";
+        onekoBtn.classList.add("active");
+        sendToast("🐱 Oneko ativado!");
+      } else {
+        sendToast("⚠️ Oneko iniciou, mas não foi encontrado.");
+      }
+    }, 500);
+  } else {
+    sendToast("❌ oneko() não está disponível.");
+  }
 });
+  }
+}
+
+
+        let dragging = false, offsetX = 0, offsetY = 0;
+        panel.addEventListener("mousedown", e => {
+          if (e.target.closest("button") || e.target.closest("input")) return;
+          dragging = true;
+          offsetX = e.clientX - panel.offsetLeft;
+          offsetY = e.clientY - panel.offsetTop;
+          panel.style.cursor = "grabbing";
+        });
+        document.addEventListener("mousemove", e => {
+          if (dragging) {
+            panel.style.left = (e.clientX - offsetX) + "px";
+            panel.style.top = (e.clientY - offsetY) + "px";
+          }
+        });
+        document.addEventListener("mouseup", () => {
+          dragging = false;
+          panel.style.cursor = "grab";
+        });
+
+      }, 1000);
+    }, 2000);
+  })();
+
+})();
