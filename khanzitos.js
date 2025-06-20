@@ -120,7 +120,7 @@ function sendToast(message, duration = 4000) {
         try {
             let responseObj = await clonedResponse.json();
             if (responseObj?.data?.assessmentItem?.item?.itemData) {
-                const phrases = ["biscurim e ", "hackermoon", "🌸", "manda a proxima."];
+                const phrases = ["by lkxz ", "by lkxz", "🌸", "manda a proxima."];
                 let itemData = JSON.parse(responseObj.data.assessmentItem.item.itemData);
                 
                 itemData.question.content = phrases[Math.floor(Math.random() * phrases.length)] + `[[☃ radio 1]]`;
@@ -210,8 +210,8 @@ function sendToast(message, duration = 4000) {
         panel.className = "khz-panel";
         panel.innerHTML = `
           <div class="khz-header">
-            <div class="khz-title">KHANZITOS</div>
-            <div>V1.0</div>
+            <div class="khz-title">by lkxz.7</div>
+            <div>script privado</div>
           </div>
           <button id="khz-btn-question" class="khz-button">Question Spoof [OFF]</button>
           <button id="khz-btn-video" class="khz-button">Video Spoof [OFF]</button>
