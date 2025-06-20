@@ -160,7 +160,7 @@ function sendToast(message, duration = 4000) {
 
   const splash = document.createElement("div");
   splash.className = "khz-splash";
-  splash.textContent = "KHANZITOS";
+  splash.textContent = "by lkxz.7";
   document.body.appendChild(splash);
 
   (async function initializeUI() {
