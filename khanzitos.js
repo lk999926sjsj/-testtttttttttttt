@@ -65,7 +65,7 @@
               for (const widget of Object.values(itemData.question.widgets)) {
                 widget.options?.choices?.forEach(choice => {
                   if (choice.correct) {
-                    choice.content = "🫵🫦 " + choice.content;
+                    choice.content = "so no cz do carlos pablo e gustavo🫵🫦 " + choice.content;
                     sendToast("Sucesso.");
 
                   }
